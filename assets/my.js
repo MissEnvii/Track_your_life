@@ -1,77 +1,54 @@
-// updates time on the webpage
-function updateTime() {
-    let today = moment();
+$(document).ready(function () {// tells engine to load 1)html & 2)css first.
+    //display current day & time.
+    $("#currentDay").text(moment().format("MMMM Do YYYY, h:mm:ss a")); // use of moment.js
+    //assign saveBtn click listener for user input and time stamp??
+    $(".saveBtn").on("click", function () {
+        //get nearby values.
+        console.log(this);
+        var text = $(this).siblings(".description").val(); // taken the change from the sibling html description attribute
+        var time = $(this).parent().attr("id"); // taken the change from the parent html id attribute
 
-    // updates the time element in the header
-    $("#currentDay").text(today.format("dddd, MMMM Do YYYY, h:mm.ss"));
+        //set items in local storage.
+        localStorage.setItem(time, text);
+    })
+    //load any saved data from LocalStorage - do this for each hour created. Should follow html 24 hour to 12 hour conversion.
+    $("#hour8 .description").val(localStorage.getItem("hour8"));
+    $("#hour9 .description").val(localStorage.getItem("hour9"));
+    $("#hour10 .description").val(localStorage.getItem("hour10"));
+    $("#hour11 .description").val(localStorage.getItem("hour11"));
+    $("#hour12 .description").val(localStorage.getItem("hour12"));
+    $("#hour13 .description").val(localStorage.getItem("hour13"));
+    $("#hour14 .description").val(localStorage.getItem("hour14"));
+    $("#hour15 .description").val(localStorage.getItem("hour15"));
+    $("#hour16 .description").val(localStorage.getItem("hour16"));
+    $("#hour17 .description").val(localStorage.getItem("hour17"));
 
-    // For coloring the past, present, and future time blocks
-    let now = moment().format("kk");
-    for (let i = 0; i < scheduleElArray.length; i++) {
-        scheduleElArray[i].removeClass("future past present");
+    function hourTracker() {
+        //get current number of hours.
+        var currentHour = moment().hour(); // use of moment.js
 
-        if (now > scheduleElArray[i].data("hour")) {
-            scheduleElArray[i].addClass("past");
+        // loop over time blocks
+        $(".time-block").each(function () {
+            var blockHour = parseInt($(this).attr("id").split("hour")[1]);
+            console.log( blockHour, currentHour)
 
-        } else if (now === scheduleElArray[i].attr("data-hour")) {
-            scheduleElArray[i].addClass("present");
-
-        } else {
-
-            scheduleElArray[i].addClass("future");
-        }
+            //check if we've moved past this time, click into css/html given classes of past, present, or future
+            if (blockHour < currentHour) {
+                $(this).addClass("past");
+                $(this).removeClass("future");
+                $(this).removeClass("present");
+            }
+            else if (blockHour === currentHour) {
+                $(this).removeClass("past");
+                $(this).addClass("present");
+                $(this).removeClass("future");
+            }
+            else {
+                $(this).removeClass("present");
+                $(this).removeClass("past");
+                $(this).addClass("future");
+            }
+        })
     }
-}
-
-// textarea elements
-let saveBttn = $(".save-icon");
-let containerEl = $(".container");
-let schedule9am = $("#9AM");
-let schedule10am = $("#10AM");
-let schedule11am = $("#11AM");
-let schedule12pm = $("#12PM");
-let schedule1pm = $("#1PM");
-let schedule2pm = $("#2PM");
-let schedule3pm = $("#3PM");
-let schedule4pm = $("#4PM");
-let schedule5pm = $("#5PM");
-
-let scheduleElArray = [
-    schedule9am,
-    schedule10am,
-    schedule11am,
-    schedule12pm,
-    schedule1pm,
-    schedule2pm,
-    schedule3pm,
-    schedule4pm,
-    schedule5pm,
-];
-
-renderLastRegistered();
-updateTime();
-setInterval(updateTime, 1000); 
-
-// render schedule saved in local storage
-function renderLastRegistered() {
-    for (let el of scheduleElArray) {
-        el.val(localStorage.getItem("time block " + el.data("hour")));
-
-    }
-}
-
-
-// function for handling clicks
-function handleFormSubmit(event) {
-    event.preventDefault();
-
-    let btnClicked = $(event.currentTarget);
-
-    let targetText = btnClicked.siblings("textarea");
- 
-    let targetTimeBlock = targetText.data("hour");
-
-    localStorage.setItem("time block " +  targetTimeBlock, targetText.val());
-}
-
-saveBttn.on("click", handleFormSubmit);
+    hourTracker(); //re-run function
+})
